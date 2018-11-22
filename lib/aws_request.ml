@@ -29,7 +29,7 @@ module String_map = Map.Make(struct
   end)
 
 let perform ~credentials ~service ~region
-      ?secure ~meth ~host ~uri ?query ?headers ?payload () =
+      ?secure ~meth ~host ?port ~uri ?query ?headers ?payload () =
   let {Aws_base.secure; meth; uri; query; headers; payload } as req =
     Aws_base.request ?secure ~meth ~host ~uri ?query ?headers ?payload ()
     |> encode_post_query
@@ -48,7 +48,7 @@ let perform ~credentials ~service ~region
   and uri =
     Uri.make ()
       ~scheme:(if secure then "https" else "http")
-      ~host ~path:uri ~query:(List.map (fun (k, v) -> (k, [v])) query)
+      ~host ?port ~path:uri ~query:(List.map (fun (k, v) -> (k, [v])) query)
   in
   Cohttp_lwt_unix.Client.call ~chunked:false ~headers ?body
     (meth :> Cohttp.Code.meth)
