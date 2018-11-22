@@ -7,4 +7,5 @@ val invoke :
   ?payload:Yojson.Safe.json ->
   ?host:string ->
   ?port:int ->
+  ?secure:bool ->
   function_name:string -> unit -> string Lwt.t
