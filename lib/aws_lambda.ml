@@ -4,7 +4,7 @@ let endpoint region =
 
 let invoke
     ~credentials ~region ?client_context ?invocation_type ?log_type ?qualifier
-    ?payload ~function_name () =
+    ?payload ?host ~function_name () =
   let query = [] |> Aws_base.Param.string "Qualifier" qualifier in
   let uri =
     Printf.sprintf "/2015-03-31/functions/%s/invocations" function_name in
@@ -33,6 +33,11 @@ let invoke
     | None         -> None
     | Some payload -> Some (Yojson.Safe.to_string payload)
   in
+  let host =
+    match host with
+    | None         -> (endpoint region)
+    | Some host    -> host
+  in
   Aws_request.perform
     ~credentials ~service:"lambda" ~region ~meth:`POST
-    ~host:(endpoint region) ~uri ~query ~headers ?payload ()
+    ~host:host ~uri ~query ~headers ?payload ()

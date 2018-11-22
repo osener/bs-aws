@@ -5,4 +5,5 @@ val invoke :
   ?log_type:[ `None | `Tail ] ->
   ?qualifier:string ->
   ?payload:Yojson.Safe.json ->
+  ?host:string ->
   function_name:string -> unit -> string Lwt.t
