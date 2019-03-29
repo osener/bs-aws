@@ -6,7 +6,7 @@ let endpoint (region : Aws_common.Region.t) =
     (Aws_common.Region.to_string region)
 
 module Job = struct
-  type 'a parameters = Yojson.Safe.json
+  type 'a parameters = Yojson.Safe.t
 
   type input_encryption = [`AES_CBC_PKCS7 | `AES_CTR | `AES_GCM]
   type output_encryption = [input_encryption | `AES_GCM | `S3 | `S3_AWS_KMS ]
@@ -113,7 +113,7 @@ module Job = struct
       ~meth:`POST ~host:(endpoint region) ~uri:"/2012-09-25/jobs" ~payload ()
       >>= fun res ->
     let res = Yojson.Safe.from_string res in
-    Lwt.return Aws_base.Json.(string (field "Id" (field "Job" res)))
+    Lwt.return Yojson.Safe.Util.(to_string (member "Id" (member "Job" res)))
 
   type input =
     { key : string }
@@ -131,10 +131,10 @@ module Job = struct
       ~meth:`GET ~host:(endpoint region) ~uri:("/2012-09-25/jobs/" ^ id) ()
     >>= fun res ->
   let res = Yojson.Safe.from_string res in
-  let open Aws_base.Json in
-  let job = field "Job" res in
+  let open Yojson.Safe.Util in
+  let job = member "Job" res in
   let status =
-    match string (field "Status" job) with
+    match to_string (member "Status" job) with
       "Submitted"   -> `Submitted
     | "Progressing" -> `Progressing
     | "Complete"    -> `Complete
@@ -144,12 +144,12 @@ module Job = struct
   in
   Lwt.return
     { status;
-      input = {key = string (field "Key" (field "Input" job))};
+      input = {key = to_string (member "Key" (member "Input" job))};
       outputs =
         List.map
           (fun o ->
-             { key = string (field "Key" o);
-               width = option int (field "Width" o);
-               height = option int (field "Height" o) })
-          (list (field "Outputs" job)) }
+             { key = to_string (member "Key" o);
+               width = to_int_option (member "Width" o);
+               height = to_int_option (member "Height" o) })
+          (to_list (member "Outputs" job)) }
 end

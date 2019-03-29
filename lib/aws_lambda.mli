@@ -1,10 +1,11 @@
+
 val invoke :
   credentials:Aws_common.credentials -> region:Aws_common.Region.t ->
-  ?client_context:Yojson.Safe.json ->
+  ?client_context:Yojson.Safe.t ->
   ?invocation_type:[ `Dry_run | `Event | `Request_response ] ->
   ?log_type:[ `None | `Tail ] ->
   ?qualifier:string ->
-  ?payload:Yojson.Safe.json ->
+  ?payload:Yojson.Safe.t ->
   ?host:string ->
   ?port:int ->
   ?secure:bool ->
